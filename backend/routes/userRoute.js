@@ -74,32 +74,37 @@ router.post(
       const { email, password } = req.body;
   
       try {
-        // Check if user exists
+        // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
+          console.log("User not found:", email);  // Debugging line
           return res.status(400).json({ message: 'Invalid credentials' });
         }
   
-        // Check if password matches
-        const isMatch = await bcrypt.compare(password, user.password);
+        // Check if password matches using matchPassword method
+        const isMatch = await user.matchPassword(password);
         if (!isMatch) {
+          console.log("Password mismatch for user:", email);  // Debugging line
           return res.status(400).json({ message: 'Invalid credentials' });
         }
   
-        // Generate JWT token
+        // If password matches, generate JWT token
         const payload = {
           userId: user._id,
         };
   
         const token = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '1h' });
+        console.log("JWT Token generated:", token);  // Debugging line
   
         res.status(200).json({ message: 'Login successful', token });
       } catch (error) {
-        console.error(error);
+        console.error("Error during login:", error);  // Debugging line
         res.status(500).json({ message: 'Server error' });
       }
     }
   );
+  
+  
   
 
 export default router;

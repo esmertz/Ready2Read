@@ -5,6 +5,8 @@ import  CreateBooks from './pages/createBooks';
 import DeleteBooks  from './pages/deleteBooks';
 import  EditBooks  from './pages/editBooks';
 import  ShowBook from './pages/showBook';
+import Signup from "./components/Signup";
+import Login from "./components/Login";
 const App = () => {
   return (
     <Routes>
@@ -13,6 +15,8 @@ const App = () => {
       <Route path="/books/details/:id" element= {<ShowBook/>}/>
       <Route path="/books/edit/:id" element= {<EditBooks/>}/>
       <Route path="/books/delete/:id" element= {<DeleteBooks/>}/>
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
     </Routes>
   )
 }
