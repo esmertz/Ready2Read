@@ -15,6 +15,11 @@ const bookSchema = mongoose.Schema(
             required: true,
         },
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        status: {
+            type: String,
+            enum: ['read', 'in-progress', 'want-to-read'],
+            default: 'want-to-read',
+          },
     },
     {
         timestamps: true,

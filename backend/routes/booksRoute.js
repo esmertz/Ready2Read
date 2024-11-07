@@ -101,4 +101,15 @@ router.delete('/:id', async (request, response) =>{
 }
 );
 
+router.get('/books/status/:status', async (req, res) => {
+    try {
+      const status = req.params.status;
+      const books = await Book.find({ status });
+      res.json({ data: books });
+    } catch (err) {
+      res.status(500).json({ message: 'Error fetching books' });
+    }
+  });
+  
+
 export default router;

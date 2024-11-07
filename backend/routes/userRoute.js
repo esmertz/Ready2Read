@@ -81,6 +81,8 @@ router.post(
           return res.status(400).json({ message: 'Invalid credentials' });
         }
   
+        console.log('Plain Password:', password);
+        console.log('Hashed Password in DB:', user.password);
         // Check if password matches using matchPassword method
         const isMatch = await user.matchPassword(password);
         if (!isMatch) {
@@ -97,11 +99,12 @@ router.post(
         console.log("JWT Token generated:", token);  // Debugging line
   
         res.status(200).json({ message: 'Login successful', token });
-      } catch (error) {
-        console.error("Error during login:", error);  // Debugging line
-        res.status(500).json({ message: 'Server error' });
+      } catch (err) {
+        console.error("Login error:", err.response);
+        setError(err.response?.data?.message || 'Invalid credentials');
       }
     }
+    
   );
   
   
