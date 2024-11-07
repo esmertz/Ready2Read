@@ -3,22 +3,19 @@ import React, { useState, useEffect } from 'react';
 const BooksCard = ({ books }) => {
   const [bookStatuses, setBookStatuses] = useState({});
 
-  // Load saved statuses from localStorage when component mounts
   useEffect(() => {
     const savedStatuses = JSON.parse(localStorage.getItem('bookStatuses')) || {};
     setBookStatuses(savedStatuses);
   }, []);
 
-  // Save book statuses to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('bookStatuses', JSON.stringify(bookStatuses));
   }, [bookStatuses]);
 
-  // Function to handle status changes
   const handleStatusChange = (bookId, status) => {
     setBookStatuses(prevStatuses => ({
       ...prevStatuses,
-      [bookId]: status, // Set the status for the book by its ID
+      [bookId]: prevStatuses[bookId] === status ? '' : status, // Toggle or clear status
     }));
   };
 
@@ -28,13 +25,10 @@ const BooksCard = ({ books }) => {
         const { id, volumeInfo } = book;
         const { title, authors, imageLinks } = volumeInfo;
         const imageUrl = imageLinks?.large || imageLinks?.thumbnail;
-
-        // Get the current status of the book (if any)
         const currentStatus = bookStatuses[id];
 
         return (
           <div key={id} className="border p-4 rounded-lg shadow-md">
-            {/* Book Image */}
             {imageUrl ? (
               <img
                 src={imageUrl}
@@ -47,13 +41,9 @@ const BooksCard = ({ books }) => {
               </div>
             )}
 
-            {/* Book Title */}
             <h3 className="font-semibold text-lg">{title}</h3>
-
-            {/* Authors */}
             {authors && <p className="text-gray-600">By: {authors.join(', ')}</p>}
 
-            {/* Status Selection */}
             <div className="mt-4">
               <p className="font-semibold">Status:</p>
               <div className="flex gap-2 mt-2">
@@ -88,7 +78,6 @@ const BooksCard = ({ books }) => {
               </div>
             </div>
 
-            {/* Display the selected status */}
             {currentStatus && (
               <p className="mt-2 text-sm text-gray-500">Status: {currentStatus}</p>
             )}
