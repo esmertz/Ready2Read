@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const BooksCard = ({ books }) => {
+const BooksCard = ({ books, updateStatus }) => {
   const [bookStatuses, setBookStatuses] = useState({});
 
   useEffect(() => {
@@ -13,7 +13,7 @@ const BooksCard = ({ books }) => {
   }, [bookStatuses]);
 
   const handleStatusChange = (bookId, status) => {
-    setBookStatuses(prevStatuses => ({
+    setBookStatuses((prevStatuses) => ({
       ...prevStatuses,
       [bookId]: prevStatuses[bookId] === status ? '' : status, // Toggle or clear status
     }));
@@ -47,6 +47,7 @@ const BooksCard = ({ books }) => {
             <div className="mt-4">
               <p className="font-semibold">Status:</p>
               <div className="flex gap-2 mt-2">
+                {/* Button to update status to "Read" */}
                 <button
                   onClick={() => handleStatusChange(id, 'Read')}
                   className={`${
@@ -55,8 +56,13 @@ const BooksCard = ({ books }) => {
                 >
                   Read
                 </button>
+
+                {/* Button to update status to "Currently Reading" */}
                 <button
-                  onClick={() => handleStatusChange(id, 'Currently Reading')}
+                  onClick={() => {
+                    handleStatusChange(id, 'Currently Reading'); // Update local status
+                    updateStatus(id, 'currently-reading'); // Also notify parent component
+                  }}
                   className={`${
                     currentStatus === 'Currently Reading'
                       ? 'bg-yellow-500'
@@ -65,6 +71,8 @@ const BooksCard = ({ books }) => {
                 >
                   Currently Reading
                 </button>
+
+                {/* Button to update status to "Want to Read" */}
                 <button
                   onClick={() => handleStatusChange(id, 'Want to Read')}
                   className={`${

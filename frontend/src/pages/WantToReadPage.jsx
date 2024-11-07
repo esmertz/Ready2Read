@@ -1,17 +1,23 @@
-import React from 'react';
-import { useLocation } from 'react-router-dom';
-import BooksCard from '../components/home/BooksCard';
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 const WantToReadPage = () => {
   const location = useLocation();
-  const books = location.state?.books || [];
+  const { book } = location.state || {}; // Extract book data from the state
 
-  const wantToReadBooks = books.filter((book) => book.status === 'Want to Read');
+  if (!book) {
+    return <p>No book selected.</p>; // Fallback if no book is passed
+  }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-semibold">Want to Read</h1>
-      <BooksCard books={wantToReadBooks} />
+    <div>
+      <h2>Want to Read</h2>
+      <div>
+        <h3>{book.volumeInfo.title}</h3>
+        <p>{book.volumeInfo.authors.join(", ")}</p>
+        <img src={book.volumeInfo.imageLinks?.thumbnail} alt={book.volumeInfo.title} />
+        <p>{book.volumeInfo.description}</p>
+      </div>
     </div>
   );
 };

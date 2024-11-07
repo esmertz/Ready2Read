@@ -1,16 +1,25 @@
-// src/components/StatusSelector.jsx
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 
-import React, { useState } from 'react';
-
-const StatusSelector = () => {
+const StatusSelector = ({ book }) => { // Receive the book prop
   const statuses = ['Reading', 'Want to Read', 'Finished'];
   const [selectedStatus, setSelectedStatus] = useState({});
+  const navigate = useNavigate();
 
   const toggleStatus = (status) => {
     setSelectedStatus((prevStatus) => ({
       ...prevStatus,
-      [status]: !prevStatus[status]
+      [status]: !prevStatus[status],
     }));
+
+    // Navigate to the respective page with the book data
+    if (status === 'Reading') {
+      navigate('/currently-reading', { state: { book } }); // Passing the book info via state
+    } else if (status === 'Want to Read') {
+      navigate('/want-to-read', { state: { book } }); // Passing the book info via state
+    } else if (status === 'Finished') {
+      navigate('/read', { state: { book } }); // Passing the book info via state
+    }
   };
 
   return (
@@ -20,8 +29,10 @@ const StatusSelector = () => {
         {statuses.map((status) => (
           <button
             key={status}
-            className={`p-2 rounded ${selectedStatus[status] ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-            onClick={() => toggleStatus(status)}
+            className={`p-2 rounded ${
+              selectedStatus[status] ? 'bg-blue-500 text-white' : 'bg-gray-300'
+            }`}
+            onClick={() => toggleStatus(status)} // Trigger the toggle and navigation
           >
             {status}
           </button>

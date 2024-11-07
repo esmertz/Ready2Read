@@ -1,33 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { MdOutlineAddBox } from 'react-icons/md';
 import BooksCard from '../components/home/BooksCard';
 import Navbar from '../components/Navbar';
-import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const [books, setBooks] = useState([]); // Full list of books
   const [loading, setLoading] = useState(false);
-  const [showType, setShowType] = useState('table');
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // Search query
-  const [filteredBooks, setFilteredBooks] = useState([]); // Filtered books list
   const [currentPage, setCurrentPage] = useState(0); // Current page index
-  const [booksPerPage] = useState(6); // Number of books per page (can be adjusted)
-  const navigate = useNavigate();
+  const [booksPerPage] = useState(6); // Number of books per page
 
   useEffect(() => {
     setLoading(true);
-    const fetchBooks = async (query = '') => {
+    const fetchBooks = async () => {
       try {
         const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
           params: {
-            q: query || 'fiction', // Use query or default to 'fiction' if searchQuery is empty
-            key: 'AIzaSyDw67LwavPSZ63XUPRF0csGJ0yW82XaJYw', // Your actual API key
+            q: 'fiction', // Default query (could be dynamic)
+            key: 'AIzaSyDw67LwavPSZ63XUPRF0csGJ0yW82XaJYw' , // Your API key
           },
         });
-        setBooks(response.data.items); // Store the fetched books
-        setFilteredBooks(response.data.items); // Initially, show all books
+        const fetchedBooks = response.data.items;
+
+        // Initialize books with empty status
+        const updatedBooks = fetchedBooks.map(book => ({
+          ...book,
+          status: '', // Initially, status is empty
+        }));
+
+        setBooks(updatedBooks); // Store the fetched books
         setLoading(false);
       } catch (error) {
         setError('Failed to load books.');
@@ -35,64 +37,34 @@ const Home = () => {
       }
     };
 
-    fetchBooks(); // Initially fetch books with no search query (defaults to fiction)
+    fetchBooks(); // Fetch books initially
   }, []);
+  const updateStatus = (bookId, status) => {
+    if (!status) return; // Prevents errors if no status is passed
+  
+    // Update the status of the selected book
+    const updatedBooks = books.map((book) =>
+      book.id === bookId ? { ...book, status } : book
+    );
+    setBooks(updatedBooks); // Update the books state with the new status
+  };
+  
 
   // Filter books based on the search query
-  useEffect(() => {
-    if (searchQuery === '') {
-      setFilteredBooks(books); // Show all books if no search query
-    } else {
-      const filtered = books.filter((book) => {
-        const { title, authors } = book.volumeInfo;
-        return (
-          title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (authors && authors.some(author => author.toLowerCase().includes(searchQuery.toLowerCase())))
-        );
-      });
-      setFilteredBooks(filtered); // Update the filtered books list
-      setCurrentPage(0); // Reset to the first page when a new search is made
-    }
-  }, [searchQuery, books]);
-
-  // Fetch books again when searchQuery changes
-  useEffect(() => {
-    if (searchQuery !== '') {
-      // Fetch books based on the new search query
-      const fetchBooksBySearch = async () => {
-        setLoading(true);
-        try {
-          const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
-            params: {
-              q: searchQuery, // Use search query to search across all books
-              maxResults: 40,
-              key: 'AIzaSyDw67LwavPSZ63XUPRF0csGJ0yW82XaJYw',
-            },
-          });
-          setBooks(response.data.items);
-          setFilteredBooks(response.data.items);
-          setLoading(false);
-        } catch (error) {
-          setError('Failed to load books.');
-          setLoading(false);
-        }
-      };
-
-      fetchBooksBySearch(); // Trigger fetch based on search query
-    }
-  }, [searchQuery]); // Runs whenever searchQuery changes
+  const filteredBooks = books.filter((book) =>
+    book.volumeInfo.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Get the current page's books
   const currentBooks = filteredBooks.slice(currentPage * booksPerPage, (currentPage + 1) * booksPerPage);
 
-  // Handle the next page
+  // Handle pagination
   const nextPage = () => {
     if ((currentPage + 1) * booksPerPage < filteredBooks.length) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  // Handle the previous page
   const prevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
@@ -101,7 +73,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <Navbar />
+      <Navbar /> {/* Navbar stays for navigation */}
 
       <header className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">Welcome to Ready2Read!</h1>
@@ -119,23 +91,29 @@ const Home = () => {
         />
       </div>
 
-      {/* Sign Up and Login Links */}
-      <div className="flex justify-center gap-6 mb-8">
+      {/* Status Buttons */}
+      <div className="flex justify-center mb-8">
         <button
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-md shadow-lg transition-all duration-300"
-          onClick={() => navigate('/signup')} // Navigate to the Sign Up page
+          onClick={() => updateStatus('currently-reading')}
+          className="px-4 py-2 mx-2 border rounded-md bg-blue-500 text-white"
         >
-          Sign Up
+          Currently Reading
         </button>
         <button
-          className="bg-green-500 hover:bg-green-600 text-white py-2 px-6 rounded-md shadow-lg transition-all duration-300"
-          onClick={() => navigate('/login')} // Navigate to the Login page
+          onClick={() => updateStatus('want-to-read')}
+          className="px-4 py-2 mx-2 border rounded-md bg-yellow-500 text-white"
         >
-          Log In
+          Want to Read
+        </button>
+        <button
+          onClick={() => updateStatus('read')}
+          className="px-4 py-2 mx-2 border rounded-md bg-green-500 text-white"
+        >
+          Finished
         </button>
       </div>
 
-      {/* Book Categories */}
+      {/* Book List */}
       <div className="mb-8">
         <h2 className="text-3xl font-semibold text-gray-800 mb-4">Books List</h2>
 
@@ -145,9 +123,7 @@ const Home = () => {
           <p className="text-red-600">{error}</p>
         ) : filteredBooks.length > 0 ? (
           <>
-           
-              <BooksCard books={currentBooks} />
-          
+            <BooksCard books={currentBooks} updateStatus={updateStatus} />
 
             {/* Pagination */}
             <div className="flex justify-center gap-4 mt-8">
@@ -170,10 +146,6 @@ const Home = () => {
         ) : (
           <p>No books found.</p>
         )}
-      </div>
-
-      <div className="flex justify-end mb-6">
-        <MdOutlineAddBox className="text-sky-800 text-4xl hover:text-sky-600 transition-all duration-300" />
       </div>
     </div>
   );
