@@ -10,7 +10,7 @@ import Login from "./components/Login";
 import ReadBooksPage from "./pages/ReadBooksPage.jsx";
 import CurrentlyReadingPage from "./pages/CurrentlyReadingPage.jsx";
 import WantToReadPage from "./pages/WantToReadPage.jsx";
-import SearchBar from './components/SearchBar';
+
 
 const App = () => {
   const [searchResults, setSearchResults] = useState([]);
@@ -18,8 +18,7 @@ const App = () => {
   return (
     
       <div className="min-h-screen bg-gray-50 p-6">
-        {/* Search Bar - Available on all pages */}
-        <SearchBar setSearchResults={setSearchResults} />
+    
 
         {/* Routes */}
         <Routes>

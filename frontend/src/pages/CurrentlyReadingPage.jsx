@@ -4,10 +4,9 @@ import BooksCard from '../components/home/BooksCard';
 
 const CurrentlyReadingPage = () => {
   const location = useLocation();
-  const { books } = location.state || { books: [] }; // Get the books from location state
+  const { books } = location.state || { books: [] };
 
-  // Filter out only books that have the "Currently Reading" status
-  const currentlyReadingBooks = books.filter(book => book.status === 'Currently Reading');
+  const currentlyReadingBooks = books.filter((book) => book.status === 'Currently Reading');
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -16,7 +15,6 @@ const CurrentlyReadingPage = () => {
         <p className="text-lg text-gray-600">Books you are currently reading</p>
       </header>
 
-      {/* Display the books that are currently being read */}
       <div className="mb-8">
         {currentlyReadingBooks.length > 0 ? (
           <BooksCard books={currentlyReadingBooks} />

@@ -2,34 +2,39 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import BooksCard from '../components/home/BooksCard';
 import Navbar from '../components/Navbar';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
-  const [books, setBooks] = useState([]); // Full list of books
+  const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [searchQuery, setSearchQuery] = useState(''); // Search query
-  const [currentPage, setCurrentPage] = useState(0); // Current page index
-  const [booksPerPage] = useState(6); // Number of books per page
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [booksPerPage] = useState(6);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state to track login status
+  const navigate = useNavigate();
 
+  // Check if the user is logged in on component mount
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);  // Set to true if token exists
+    }
+
     setLoading(true);
     const fetchBooks = async () => {
       try {
         const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
-          params: {
-            q: 'fiction', // Default query (could be dynamic)
-            key: 'AIzaSyDw67LwavPSZ63XUPRF0csGJ0yW82XaJYw' , // Your API key
-          },
+          params: { q: 'fiction', key: 'AIzaSyDw67LwavPSZ63XUPRF0csGJ0yW82XaJYw' },
         });
         const fetchedBooks = response.data.items;
 
-        // Initialize books with empty status
-        const updatedBooks = fetchedBooks.map(book => ({
+        const updatedBooks = fetchedBooks.map((book) => ({
           ...book,
-          status: '', // Initially, status is empty
+          status: '',
         }));
 
-        setBooks(updatedBooks); // Store the fetched books
+        setBooks(updatedBooks);
         setLoading(false);
       } catch (error) {
         setError('Failed to load books.');
@@ -37,28 +42,22 @@ const Home = () => {
       }
     };
 
-    fetchBooks(); // Fetch books initially
+    fetchBooks();
   }, []);
+
   const updateStatus = (bookId, status) => {
-    if (!status) return; // Prevents errors if no status is passed
-  
-    // Update the status of the selected book
     const updatedBooks = books.map((book) =>
       book.id === bookId ? { ...book, status } : book
     );
-    setBooks(updatedBooks); // Update the books state with the new status
+    setBooks(updatedBooks);
   };
-  
 
-  // Filter books based on the search query
   const filteredBooks = books.filter((book) =>
     book.volumeInfo.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Get the current page's books
   const currentBooks = filteredBooks.slice(currentPage * booksPerPage, (currentPage + 1) * booksPerPage);
 
-  // Handle pagination
   const nextPage = () => {
     if ((currentPage + 1) * booksPerPage < filteredBooks.length) {
       setCurrentPage(currentPage + 1);
@@ -71,49 +70,87 @@ const Home = () => {
     }
   };
 
+  const goToCurrentlyReadingPage = () => {
+    navigate('/currently-reading', { state: { books } });
+  };
+  const goToReadPage = () => {
+    navigate('/read', { state: { books } });
+  };
+  const goToWantToReadPage = () => {
+    navigate('/want-to-read', { state: { books } });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Remove token on logout
+    setIsLoggedIn(false); // Update login status
+    navigate('/login'); // Redirect to login page
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <Navbar /> {/* Navbar stays for navigation */}
 
       <header className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">Welcome to Ready2Read!</h1>
         <p className="text-lg text-gray-600">Manage your reading journey and explore new books</p>
       </header>
 
-      {/* Search Bar */}
+      <div className="flex justify-center mb-8">
+        {isLoggedIn ? (
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+          >
+            Logout
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 border rounded-md bg-blue-600 text-white mr-4"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => navigate('/signup')}
+              className="px-4 py-2 border rounded-md bg-green-600 text-white"
+            >
+              Sign Up
+            </button>
+          </>
+        )}
+      </div>
+
       <div className="flex justify-center mb-8">
         <input
           type="text"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)} // Update searchQuery state
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search for books..."
           className="px-4 py-2 border rounded-md w-1/3"
         />
       </div>
 
-      {/* Status Buttons */}
       <div className="flex justify-center mb-8">
         <button
-          onClick={() => updateStatus('currently-reading')}
-          className="px-4 py-2 mx-2 border rounded-md bg-blue-500 text-white"
+          onClick={goToCurrentlyReadingPage}
+          className="px-4 py-2 border rounded-md bg-blue-600 text-white"
         >
-          Currently Reading
+          View Currently Reading
         </button>
         <button
-          onClick={() => updateStatus('want-to-read')}
-          className="px-4 py-2 mx-2 border rounded-md bg-yellow-500 text-white"
+          onClick={goToReadPage}
+          className="px-4 py-2 border rounded-md bg-blue-600 text-white"
         >
-          Want to Read
+          View Read
         </button>
         <button
-          onClick={() => updateStatus('read')}
-          className="px-4 py-2 mx-2 border rounded-md bg-green-500 text-white"
+          onClick={goToWantToReadPage}
+          className="px-4 py-2 border rounded-md bg-blue-600 text-white"
         >
-          Finished
+          View Want to Read
         </button>
       </div>
 
-      {/* Book List */}
       <div className="mb-8">
         <h2 className="text-3xl font-semibold text-gray-800 mb-4">Books List</h2>
 
@@ -125,19 +162,18 @@ const Home = () => {
           <>
             <BooksCard books={currentBooks} updateStatus={updateStatus} />
 
-            {/* Pagination */}
             <div className="flex justify-center gap-4 mt-8">
               <button
                 onClick={prevPage}
                 className="bg-gray-300 hover:bg-gray-400 text-white py-2 px-4 rounded-full"
-                disabled={currentPage === 0} // Disable when on the first page
+                disabled={currentPage === 0}
               >
                 &#8592; Prev
               </button>
               <button
                 onClick={nextPage}
                 className="bg-gray-300 hover:bg-gray-400 text-white py-2 px-4 rounded-full"
-                disabled={(currentPage + 1) * booksPerPage >= filteredBooks.length} // Disable when on the last page
+                disabled={(currentPage + 1) * booksPerPage >= filteredBooks.length}
               >
                 Next &#8594;
               </button>
