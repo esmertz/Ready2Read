@@ -24,23 +24,51 @@ const Home = () => {
     setLoading(true);
     const fetchBooks = async () => {
       try {
-        const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
-          params: { q: 'fiction', key: 'AIzaSyDw67LwavPSZ63XUPRF0csGJ0yW82XaJYw' },
-        });
-        const fetchedBooks = response.data.items;
-
-        const updatedBooks = fetchedBooks.map((book) => ({
-          ...book,
-          status: '',
-        }));
-
-        setBooks(updatedBooks);
+        const allBooks = [];
+        let startIndex = 0;
+        const maxResults = 40; // Maximum allowed by Google Books API
+        const totalBooksToFetch = 100; // Adjust based on your needs
+    
+        while (startIndex < totalBooksToFetch) {
+          const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
+            params: {
+              q: 'fiction',
+              key: 'AIzaSyDw67LwavPSZ63XUPRF0csGJ0yW82XaJYw',
+              maxResults,
+              startIndex,
+            },
+          });
+    
+          const fetchedBooks = response.data.items;
+    
+          if (!fetchedBooks || fetchedBooks.length === 0) break;
+    
+          // Add fetched books to the list
+          allBooks.push(...fetchedBooks.map((book) => ({ ...book, status: '' })));
+          startIndex += maxResults; // Increment startIndex for the next batch
+        }
+    
+        // Remove duplicates based on book id
+        const uniqueBooks = Array.from(
+          new Map(allBooks.map((book) => [book.id, book])).values()
+        );
+    
+        // Sort the combined results alphabetically by title
+        const sortedBooks = uniqueBooks
+          .filter((book) => book.volumeInfo && book.volumeInfo.title)
+          .sort((a, b) =>
+            a.volumeInfo.title.localeCompare(b.volumeInfo.title, undefined, { sensitivity: 'base' })
+          );
+    
+        setBooks(sortedBooks);
         setLoading(false);
       } catch (error) {
         setError('Failed to load books.');
         setLoading(false);
       }
     };
+    
+    
 
     fetchBooks();
   }, []);
@@ -53,10 +81,12 @@ const Home = () => {
   };
 
   const filteredBooks = books.filter((book) =>
-    book.volumeInfo.title.toLowerCase().includes(searchQuery.toLowerCase())
+    book.volumeInfo?.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
 
-  const currentBooks = filteredBooks.slice(currentPage * booksPerPage, (currentPage + 1) * booksPerPage);
+  const currentBooks = books.slice(currentPage * booksPerPage, (currentPage + 1) * booksPerPage);
+
 
   const nextPage = () => {
     if ((currentPage + 1) * booksPerPage < filteredBooks.length) {
