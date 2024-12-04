@@ -11,14 +11,13 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [booksPerPage] = useState(6);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // New state to track login status
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
   const navigate = useNavigate();
 
-  // Check if the user is logged in on component mount
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      setIsLoggedIn(true);  // Set to true if token exists
+      setIsLoggedIn(true); // If token exists, the user is logged in
     }
 
     setLoading(true);
@@ -26,8 +25,8 @@ const Home = () => {
       try {
         const allBooks = [];
         let startIndex = 0;
-        const maxResults = 40; // Maximum allowed by Google Books API
-        const totalBooksToFetch = 100; // Adjust based on your needs
+        const maxResults = 40;
+        const totalBooksToFetch = 100;
     
         while (startIndex < totalBooksToFetch) {
           const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
@@ -43,17 +42,14 @@ const Home = () => {
     
           if (!fetchedBooks || fetchedBooks.length === 0) break;
     
-          // Add fetched books to the list
           allBooks.push(...fetchedBooks.map((book) => ({ ...book, status: '' })));
-          startIndex += maxResults; // Increment startIndex for the next batch
+          startIndex += maxResults;
         }
     
-        // Remove duplicates based on book id
         const uniqueBooks = Array.from(
           new Map(allBooks.map((book) => [book.id, book])).values()
         );
     
-        // Sort the combined results alphabetically by title
         const sortedBooks = uniqueBooks
           .filter((book) => book.volumeInfo && book.volumeInfo.title)
           .sort((a, b) =>
@@ -68,14 +64,16 @@ const Home = () => {
       }
     };
     
-    
-
     fetchBooks();
   }, []);
 
-  const updateStatus = (bookId, status) => {
+  const updateStatus = (bookId, newStatus) => {
+    if (!isLoggedIn) return; // Prevent updating status if not logged in
+
     const updatedBooks = books.map((book) =>
-      book.id === bookId ? { ...book, status } : book
+      book.id === bookId
+        ? { ...book, status: book.status === newStatus ? '' : newStatus }
+        : book
     );
     setBooks(updatedBooks);
   };
@@ -83,10 +81,11 @@ const Home = () => {
   const filteredBooks = books.filter((book) =>
     book.volumeInfo?.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
 
-  const currentBooks = books.slice(currentPage * booksPerPage, (currentPage + 1) * booksPerPage);
-
+  const currentBooks = filteredBooks.slice(
+    currentPage * booksPerPage,
+    (currentPage + 1) * booksPerPage
+  );
 
   const nextPage = () => {
     if ((currentPage + 1) * booksPerPage < filteredBooks.length) {
@@ -101,24 +100,27 @@ const Home = () => {
   };
 
   const goToCurrentlyReadingPage = () => {
+    if (!isLoggedIn) return; // Prevent navigation if not logged in
     navigate('/currently-reading', { state: { books } });
   };
+
   const goToReadPage = () => {
+    if (!isLoggedIn) return; // Prevent navigation if not logged in
     navigate('/read', { state: { books } });
   };
+
   const goToWantToReadPage = () => {
+    if (!isLoggedIn) return; // Prevent navigation if not logged in
     navigate('/want-to-read', { state: { books } });
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); // Remove token on logout
-    setIsLoggedIn(false); // Update login status
-    navigate('/login'); // Redirect to login page
+    localStorage.removeItem('token');  // Remove the token from localStorage
+    setIsLoggedIn(false);              // Update login status to false               // Redirect to the login page
   };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-
       <header className="text-center mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">Welcome to Ready2Read!</h1>
         <p className="text-lg text-gray-600">Manage your reading journey and explore new books</p>
@@ -161,24 +163,30 @@ const Home = () => {
       </div>
 
       <div className="flex justify-center mb-8">
-        <button
-          onClick={goToCurrentlyReadingPage}
-          className="px-4 py-2 border rounded-md bg-blue-600 text-white"
-        >
-          View Currently Reading
-        </button>
-        <button
-          onClick={goToReadPage}
-          className="px-4 py-2 border rounded-md bg-blue-600 text-white"
-        >
-          View Read
-        </button>
-        <button
-          onClick={goToWantToReadPage}
-          className="px-4 py-2 border rounded-md bg-blue-600 text-white"
-        >
-          View Want to Read
-        </button>
+        {isLoggedIn ? (
+          <>
+            <button
+              onClick={goToCurrentlyReadingPage}
+              className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+            >
+              View Currently Reading
+            </button>
+            <button
+              onClick={goToReadPage}
+              className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+            >
+              View Read
+            </button>
+            <button
+              onClick={goToWantToReadPage}
+              className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+            >
+              View Want to Read
+            </button>
+          </>
+        ) : (
+          <p>Please log in to manage your reading list.</p>
+        )}
       </div>
 
       <div className="mb-8">

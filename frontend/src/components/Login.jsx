@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 const Login = () => {
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,7 +22,7 @@ const Login = () => {
       console.log("Login response:", response);
       localStorage.setItem('token', response.data.token); // Store the token
       // Redirect or update UI after successful login
-      // window.location.href = '/home';  // Or use React Router's `useHistory` to navigate
+      window.location.href = '/';  // Or use React Router's `useHistory` to navigate
     } catch (err) {
       console.error("Login error:", err.response);
       setError(err.response?.data?.message || 'Invalid credentials');
