@@ -17,7 +17,9 @@ const Signup = () => {
       [e.target.name]: e.target.value,
     });
   };
-
+  const handleBack = () => {
+    navigate('/'); // Navigate back to the Home page
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -36,7 +38,17 @@ const Signup = () => {
   };
 
   return (
+    <div>
+    <div className="flex justify-start mb-8">
+        <button
+          onClick={handleBack}
+          className="px-4 py-2 border rounded-md bg-gray-600 text-white"
+        >
+          Back
+        </button>
+      </div>
     <div style={styles.container}>
+    
       <h2 style={styles.heading}>Sign Up</h2>
       {error && <div style={styles.error}>{error}</div>}
       <form onSubmit={handleSubmit} style={styles.form}>
@@ -78,6 +90,7 @@ const Signup = () => {
       <p style={styles.footer}>
         Already have an account? <a href="/login" style={styles.link}>Log in</a>
       </p>
+    </div>
     </div>
   );
 };

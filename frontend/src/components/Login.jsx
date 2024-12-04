@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const Login = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,10 +31,25 @@ const Login = () => {
       setError(err.response?.data?.message || 'Invalid credentials');
     }
   };
-
+  const handleBack = () => {
+    console.log("Navigating back to homepage...");
+    navigate('/');
+  };
+  
   return (
+<div>
+          {/* Back button */}
+          <div className="flex justify-start mb-8">
+          <button
+            onClick={handleBack}
+            className="px-4 py-2 border rounded-md bg-gray-600 text-white"
+          >
+            Back
+          </button>
+        </div>
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
+
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Login</h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         
@@ -77,6 +95,7 @@ const Login = () => {
           </p>
         </div>
       </div>
+    </div>
     </div>
   );
 };
