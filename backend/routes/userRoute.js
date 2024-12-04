@@ -38,7 +38,7 @@ router.post('/register',
       await user.save(); // Mongoose middleware will hash before saving
 
       const payload = { userId: user._id };
-      const token = jwt.sign(payload, 'your_jwt_secret', { expiresIn: '1h' });
+      const token = jwt.sign(payload, '32password!!@#$hellohibcdhcdbjk', { expiresIn: '1h' });
 
       res.status(201).json({ message: 'User registered successfully', token });
 
@@ -50,6 +50,7 @@ router.post('/register',
 
 
 // Login route
+
 
 
 // Login route

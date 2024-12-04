@@ -27,7 +27,7 @@ const Home = () => {
         let startIndex = 0;
         const maxResults = 40;
         const totalBooksToFetch = 100;
-    
+
         while (startIndex < totalBooksToFetch) {
           const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
             params: {
@@ -37,25 +37,25 @@ const Home = () => {
               startIndex,
             },
           });
-    
+
           const fetchedBooks = response.data.items;
-    
+
           if (!fetchedBooks || fetchedBooks.length === 0) break;
-    
+
           allBooks.push(...fetchedBooks.map((book) => ({ ...book, status: '' })));
           startIndex += maxResults;
         }
-    
+
         const uniqueBooks = Array.from(
           new Map(allBooks.map((book) => [book.id, book])).values()
         );
-    
+
         const sortedBooks = uniqueBooks
           .filter((book) => book.volumeInfo && book.volumeInfo.title)
           .sort((a, b) =>
             a.volumeInfo.title.localeCompare(b.volumeInfo.title, undefined, { sensitivity: 'base' })
           );
-    
+
         setBooks(sortedBooks);
         setLoading(false);
       } catch (error) {
@@ -63,7 +63,7 @@ const Home = () => {
         setLoading(false);
       }
     };
-    
+
     fetchBooks();
   }, []);
 
@@ -120,17 +120,17 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <header className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">Welcome to Ready2Read!</h1>
-        <p className="text-lg text-gray-600">Manage your reading journey and explore new books</p>
+    <div className="min-h-screen bg-white p-6">
+      <header className="text-center mb-12 text-gray-800">
+        <h1 className="text-5xl font-extrabold text-shadow-lg mb-3">Welcome to Ready2Read!</h1>
+        <p className="text-xl">Manage your reading journey and explore new books.</p>
       </header>
 
       <div className="flex justify-center mb-8">
         {isLoggedIn ? (
           <button
             onClick={handleLogout}
-            className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+            className="px-6 py-3 bg-red-600 text-white rounded-full hover:bg-red-700 transition-all duration-300"
           >
             Logout
           </button>
@@ -138,13 +138,13 @@ const Home = () => {
           <>
             <button
               onClick={() => navigate('/login')}
-              className="px-4 py-2 border rounded-md bg-blue-600 text-white mr-4"
+              className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 mr-4"
             >
               Login
             </button>
             <button
               onClick={() => navigate('/signup')}
-              className="px-4 py-2 border rounded-md bg-green-600 text-white"
+              className="px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-300"
             >
               Sign Up
             </button>
@@ -153,13 +153,16 @@ const Home = () => {
       </div>
 
       <div className="flex justify-center mb-8">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search for books..."
-          className="px-4 py-2 border rounded-md w-1/3"
-        />
+        <div className="relative w-1/2">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search for books..."
+            className="w-full px-6 py-3 rounded-full border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          />
+          <span className="absolute right-4 top-3 text-gray-500">🔍</span>
+        </div>
       </div>
 
       <div className="flex justify-center mb-8">
@@ -167,50 +170,50 @@ const Home = () => {
           <>
             <button
               onClick={goToCurrentlyReadingPage}
-              className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+              className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 mx-2"
             >
-              View Currently Reading
+              Currently Reading
             </button>
             <button
               onClick={goToReadPage}
-              className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+              className="px-6 py-3 bg-green-600 text-white rounded-full hover:bg-green-700 transition-all duration-300 mx-2"
             >
-              View Read
+              Read
             </button>
             <button
               onClick={goToWantToReadPage}
-              className="px-4 py-2 border rounded-md bg-blue-600 text-white"
+              className="px-6 py-3 bg-yellow-600 text-white rounded-full hover:bg-yellow-700 transition-all duration-300 mx-2"
             >
-              View Want to Read
+              Want to Read
             </button>
           </>
         ) : (
-          <p>Please log in to manage your reading list.</p>
+          <p className="text-gray-800">Please log in to manage your reading list.</p>
         )}
       </div>
 
       <div className="mb-8">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-4">Books List</h2>
+        <h2 className="text-3xl font-semibold text-gray-800 mb-6">Books List</h2>
 
         {loading ? (
-          <p>Loading...</p>
+          <p className="text-gray-800">Loading...</p>
         ) : error ? (
           <p className="text-red-600">{error}</p>
         ) : filteredBooks.length > 0 ? (
           <>
             <BooksCard books={currentBooks} updateStatus={updateStatus} />
 
-            <div className="flex justify-center gap-4 mt-8">
+            <div className="flex justify-center gap-6 mt-8">
               <button
                 onClick={prevPage}
-                className="bg-gray-300 hover:bg-gray-400 text-white py-2 px-4 rounded-full"
+                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-full transition-all duration-300"
                 disabled={currentPage === 0}
               >
                 &#8592; Prev
               </button>
               <button
                 onClick={nextPage}
-                className="bg-gray-300 hover:bg-gray-400 text-white py-2 px-4 rounded-full"
+                className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-full transition-all duration-300"
                 disabled={(currentPage + 1) * booksPerPage >= filteredBooks.length}
               >
                 Next &#8594;
@@ -218,7 +221,7 @@ const Home = () => {
             </div>
           </>
         ) : (
-          <p>No books found.</p>
+          <p className="text-gray-800">No books found.</p>
         )}
       </div>
     </div>
