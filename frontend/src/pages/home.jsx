@@ -50,13 +50,13 @@ const Home = () => {
           new Map(allBooks.map((book) => [book.id, book])).values()
         );
 
-        const sortedBooks = uniqueBooks
-          .filter((book) => book.volumeInfo && book.volumeInfo.title)
-          .sort((a, b) =>
-            a.volumeInfo.title.localeCompare(b.volumeInfo.title, undefined, { sensitivity: 'base' })
-          );
+        const storedBooks = JSON.parse(localStorage.getItem('books')) || [];
+        const updatedBooks = storedBooks.map((book) => {
+          const storedBook = storedBooks.find((stored) => stored.id === book.id);
+          return storedBook ? { ...book, status: storedBook.status } : book;
+        });
 
-        setBooks(sortedBooks);
+        setBooks(updatedBooks); // Set books with restored statuses
         setLoading(false);
       } catch (error) {
         setError('Failed to load books.');
@@ -65,17 +65,29 @@ const Home = () => {
     };
 
     fetchBooks();
+    window.addEventListener('storage', handleStorageChange); // Add event listener
+
+    return () => { // Clean up event listener
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
+  const handleStorageChange = (event) => {
+    if (event.key === 'books') {
+      const updatedBooks = JSON.parse(event.newValue);
+      setBooks(updatedBooks);
+    }
+  };
   const updateStatus = (bookId, newStatus) => {
-    if (!isLoggedIn) return; // Prevent updating status if not logged in
-
+    if (!isLoggedIn) return;
+  
     const updatedBooks = books.map((book) =>
-      book.id === bookId
-        ? { ...book, status: book.status === newStatus ? '' : newStatus }
-        : book
+      book.id === bookId ? { ...book, status: newStatus } : book // Directly set the new status
     );
+  
+    localStorage.setItem('books', JSON.stringify(updatedBooks));
     setBooks(updatedBooks);
+    // Consider refetching data from the backend to ensure consistency
   };
 
   const filteredBooks = books.filter((book) =>

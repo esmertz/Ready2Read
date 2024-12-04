@@ -24,24 +24,26 @@ const BooksCard = ({ books, updateStatus }) => {
           <p className="text-sm text-gray-600">{book.volumeInfo.authors?.join(', ')}</p>
           
           {/* Status Buttons */}
-          <div className="flex justify-center mt-4">
-            {['Currently Reading', 'Want to Read', 'Finished'].map((status) => (
-              <button
-                key={status}
-                onClick={() => updateStatus(book.id, status)}
-                className={`px-4 py-2 mx-2 border rounded-md text-white ${
-                  book.status === status
-                    ? status === 'Currently Reading'
-                      ? 'bg-blue-500'
-                      : status === 'Want to Read'
-                      ? 'bg-yellow-500'
-                      : 'bg-green-500'
-                    : 'bg-gray-400'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
+         
+          <div className="flex justify-center mt-4"> {/* Container for styled select */}
+            <select
+              value={book.status}
+              onChange={(e) => updateStatus(book.id, e.target.value)}
+              className={`px-4 py-2 mx-2 border rounded-md text-white ${
+                book.status === 'Currently Reading'
+                  ? 'bg-blue-500'
+                  : book.status === 'Want to Read'
+                  ? 'bg-yellow-500'
+                  : book.status === 'Finished'
+                  ? 'bg-green-500'
+                  : 'bg-gray-400' // Default style if no status is selected
+              }`}
+            >
+              <option value="">None</option>
+              <option value="Currently Reading">Currently Reading</option>
+              <option value="Want to Read">Want to Read</option>
+              <option value="Finished">Finished</option>
+            </select>
           </div>
         </div>
       ))}

@@ -22,11 +22,34 @@ const Signup = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    // Validate password
+    const { password } = formData;
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setError("Password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[a-z]/.test(password)) {
+      setError("Password must contain at least one lowercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      setError("Password must contain at least one number.");
+      return;
+    }
+    if (!/[!@#$%^&*]/.test(password)) {
+      setError("Password must contain at least one special character (!@#$%^&*).");
+      return;
+    }
+  
     try {
       // Sending the form data to backend for signup
       const response = await axios.post('http://localhost:5555/api/auth/register', formData);
-
+  
       // On success, redirect to login page
       if (response.status === 201) {
         navigate('/login');
@@ -36,6 +59,7 @@ const Signup = () => {
       setError(err.response ? err.response.data.message : 'Something went wrong');
     }
   };
+  
 
   return (
     <div>

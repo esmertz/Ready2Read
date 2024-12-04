@@ -115,19 +115,20 @@ router.delete('/:id', async (request, response) => {
 });
 
 // Route to get books by status (e.g., 'read', 'in-progress', 'want-to-read')
-router.get('/books/status/:status', async (req, res) => {
+
+router.get('/books/status/:status', protect, async (req, res) => { // Added protect middleware
   try {
-    const status = req.params.status; // Extract the status from the URL params
-    
-    // Find books with the given status
-    const books = await Book.find({ status });
-    
-    // Return the books found
-    res.json({ data: books });
+    const status = req.params.status;
+    const userId = req.user; // Get the userId from the authenticated user
+
+    // Find books with the given status AND userId
+    const books = await Book.find({ status, userId }); 
+
+    res.json({  books });
   } catch (err) {
-    // Return error message in case of failure
     res.status(500).json({ message: 'Error fetching books' });
   }
 });
+
 
 export default router;

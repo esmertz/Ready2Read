@@ -24,6 +24,7 @@ const Login = () => {
       const response = await axios.post('http://localhost:5555/api/auth/login', { email, password });
       console.log("Login response:", response);
       localStorage.setItem('token', response.data.token); // Store the token
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       // Redirect or update UI after successful login
       window.location.href = '/';  // Or use React Router's `useHistory` to navigate
     } catch (err) {
